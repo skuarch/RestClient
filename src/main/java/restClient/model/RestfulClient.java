@@ -1,8 +1,9 @@
-package model.net.rest;
+package restClient.model;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.ConnectException;
 import java.net.HttpURLConnection;
@@ -10,6 +11,7 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.Base64;
 import java.util.EmptyStackException;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -17,36 +19,37 @@ import java.util.Map;
  *
  * @author skuarch
  */
-public abstract class RestfulClient {
+public abstract class RestfulClient implements AutoCloseable {
 
-    protected OutputStream outputStream = null;
-    protected InputStream inputStream = null;
-    protected BufferedReader bufferedReader = null;
-    protected HttpURLConnection hurlc = null;
+    private HttpURLConnection hurlc = null;
     protected static final String UTF_8 = "utf-8";
     protected static final String HURLC_IS_NULL = "hurlc is null";
     protected static final String WRONG_RESPONSE_CODE = "response code is not 200";
     protected static final int HTTP_OK = 200;
+    protected static final int HTTP_CREATED = 201;
+    protected static final int HTTP_ACCEPTED = 202;
+    protected static final int HTTP_PARTIAL_INFO = 203;
+    protected static final String POST = "POST";
+    protected static final String GET = "GET";
+    protected static final String PUT = "PUT";
+    protected static final String DELETE = "DELETE";
     private int responseCode = 0;
     private boolean isConnected = false;
+    private String url;
 
     //==========================================================================
     /**
-     * establish the connection.
+     * establish connection.
      *
-     * @param path
-     * @param requestMethod
+     * @param url String
+     * @param requestMethod String
      * @throws IOException in case of error
      */
-    protected void openConnection(String path, String requestMethod) throws IOException {
+    public void openConnection(String url, String requestMethod) throws IOException {
 
         try {
 
-            if (path == null || path.length() < 1) {
-                throw new IllegalArgumentException("path is null or empty");
-            }
-
-            if (path == null) {
+            if (url == null || url.length() < 1) {
                 throw new IllegalArgumentException("path is null or empty");
             }
 
@@ -54,23 +57,41 @@ public abstract class RestfulClient {
                 throw new IllegalArgumentException("requestMethod is null or empty");
             }
 
-            URL url = new URL(path);
-            hurlc = (HttpURLConnection) url.openConnection();
+            if (isConnected) {
+                throw new IOException("already connected");
+            }
+
+            URL u = new URL(url);
+            hurlc = (HttpURLConnection) u.openConnection();
+            hurlc.setRequestMethod(requestMethod.toUpperCase(Locale.US));
 
             if (hurlc.getErrorStream() != null) {
                 throw new IOException("error establishing connection, please check the url and request method");
             }
 
             isConnected = true;
+            this.url = url;
 
-        } catch (IllegalArgumentException | IOException e) {
-            throw e;
+        } catch (IOException ioe) {
+            throw ioe;
+        } catch (IllegalArgumentException iae) {
+            throw iae;
         }
 
     }
 
     //==========================================================================
+    /**
+     * retrieve the number of response code like 404, 500 or other HTTP code.
+     *
+     * @return integer
+     * @throws Exception in case of error.
+     */
     protected int getResponseCode() throws Exception {
+
+        if (!isConnected) {
+            throw new ConnectException("no connected");
+        }
 
         try {
             responseCode = hurlc.getResponseCode();
@@ -82,7 +103,12 @@ public abstract class RestfulClient {
     }
 
     //==========================================================================
-    protected void setDefaulProperties() throws Exception {
+    /**
+     * avoid cache and set the <code>charset</code> to UTF-8.
+     *
+     * @throws Exception in case of error.
+     */
+    public void setDefaulProperties() throws Exception {
 
         if (hurlc == null) {
             throw new IllegalStateException(HURLC_IS_NULL);
@@ -95,7 +121,6 @@ public abstract class RestfulClient {
         try {
 
             hurlc.setInstanceFollowRedirects(false);
-            //hurlc.setRequestMethod(requestMethod);
             setRequestProperty("charset", UTF_8);
             hurlc.setUseCaches(false);
             hurlc.setDefaultUseCaches(false);
@@ -139,21 +164,53 @@ public abstract class RestfulClient {
 
     }
 
+    //==========================================================================
+    /**
+     * set Content-Type.
+     *
+     * @param contentType String
+     * @throws Exception in case of error
+     */
+    public void setContentType(String contentType) throws Exception {
+
+        if (contentType == null || contentType.length() < 1) {
+            throw new IllegalArgumentException("contentType is null or empty");
+        }
+
+        try {
+            setRequestProperty("Content-Type:", contentType);
+        } catch (Exception e) {
+            throw e;
+        }
+
+    }
+
+    //==========================================================================
     /**
      * send text to remote server.
      *
      * @param text String
-     * @throws IOException in case of error
+     * @throws Exception in case of error
      */
-    protected abstract void sendText(String text) throws IOException;
+    public abstract void sendText(String text) throws Exception;
 
+    //==========================================================================
     /**
      * receive test from remote host.
      *
      * @return String
-     * @throws IOException in case of error
+     * @throws Exception in case of error
      */
-    protected abstract String receiveText() throws IOException;
+    public abstract String receiveText() throws Exception;
+
+    //==========================================================================
+    /**
+     * close connection.
+     *
+     * @throws Exception in case of error
+     */
+    @Override
+    public abstract void close() throws Exception;
 
     //==========================================================================
     /**
@@ -162,10 +219,10 @@ public abstract class RestfulClient {
      * @param credentials String
      * @throws IOException in case of error
      */
-    protected void setAuthentication(String credentials) throws IOException {
+    public void setAuthentication(String credentials) throws IOException {
 
         if (credentials == null || credentials.length() < 1) {
-            throw new IllegalArgumentException("creadentials are empty or null");
+            throw new IllegalArgumentException("credentials are empty or null");
         }
 
         if (hurlc == null) {
@@ -179,36 +236,19 @@ public abstract class RestfulClient {
 
     //==========================================================================
     /**
-     * close connection.
-     *
-     * @throws java.io.IOException in case of error
-     */
-    public final void closeConnection() throws Exception {
-
-        try {
-
-            disconnectURL();
-            closeOutputStream(outputStream);
-            closeInputStream(inputStream);
-            closeBufferedReader(bufferedReader);
-
-        } catch (Exception e) {
-            throw e;
-        }
-
-    } // end closeConnection
-
-    //==========================================================================
-    /**
      * disconnect from URL.
      *
-     * @throws java.lang.Exception
+     * @throws java.lang.Exception in case of error
      */
     protected final void disconnectURL() throws Exception {
 
         try {
 
             if (hurlc == null) {
+                return;
+            }
+
+            if (!isConnected) {
                 return;
             }
 
@@ -222,6 +262,8 @@ public abstract class RestfulClient {
 
         } catch (Exception e) {
             throw e;
+        } finally {
+            hurlc = null;
         }
 
     }
@@ -267,6 +309,19 @@ public abstract class RestfulClient {
 
     //==========================================================================
     /**
+     * close InputStreamReaer.
+     *
+     * @param inputStreamReader InputStreamReader
+     * @throws Exception in case of error.
+     */
+    protected final void closeInputStreamReader(InputStreamReader inputStreamReader) throws Exception {
+        if (inputStreamReader != null) {
+            inputStreamReader.close();
+        }
+    }
+
+    //==========================================================================
+    /**
      * creates query parameters.
      *
      * @param parameters Map
@@ -280,28 +335,69 @@ public abstract class RestfulClient {
 
         StringBuilder sb = new StringBuilder();
 
-        parameters.entrySet().stream().forEach((entrySet) -> {
-            String key = entrySet.getKey();
-            Object value = entrySet.getValue();
-            
-            if(key == null || key.equals("")){
+        for (Map.Entry<String, Object> entry : parameters.entrySet()) {
+            String key = entry.getKey();
+            Object value = entry.getValue();
+            if (key == null || key.equals("")) {
                 throw new EmptyStackException();
             }
-            
+
             sb.append(key).append("=").append(value).append("&");
-        });
+        }
 
         return sb.toString();
 
     }
 
     //==========================================================================
-    public class RestfulClientException extends Exception {
+    /**
+     * getter.
+     *
+     * @return String
+     */
+    public String getUrl() {
+        return url;
+    }
 
-        public RestfulClientException() {
-            super();
-        }
+    //==========================================================================
+    /**
+     * return the status if connection, default is false.
+     *
+     * @return boolean
+     */
+    public boolean isConnected() {
+        return isConnected;
+    }
 
+    //==========================================================================
+    /**
+     * return the number of response this method doesn't call to getResponseCode
+     * from httpUrlConnection.
+     *
+     * @return integer and can be 0, when the connection is not established
+     */
+    public int getResponseCodeCache() {
+        return responseCode;
+    }
+
+    //==========================================================================
+    /**
+     * set the status of the connection.
+     *
+     * @param isConnected boolean
+     */
+    public void isConnected(boolean isConnected) {
+        this.isConnected = isConnected;
+    }
+
+    //==========================================================================
+    /**
+     * return the HttpURLConnection instance.
+     *
+     * @return HttpURLConnection
+     */
+    protected HttpURLConnection getHurlc() {
+        return hurlc;
     }
 
 }
