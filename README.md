@@ -23,14 +23,14 @@ This library sends text to restful webservice, just used the wrappers and thats 
 ```java
 HttpClientBody hcb = new HttpClientBody("http://jsonplaceholder.typicode.com/posts/1", "DELETE");
 
+    String parameters = "id=1&title='title'&body='body'&userId=1";
+
     try {
 
         hcb.openConnection();
-        String parameters = "id=1&title='title'&body='body'&userId=1";
         hcb.sendText(parameters);
         String result = hcb.receiveText();
-        System.out.println("result3 " + result);
-        System.out.println("response code " + hcb.getResponceCode());
+        int responseCode = hcb.getResponceCode());
 
     } catch (Exception ex) {
         throw ex;
@@ -44,13 +44,14 @@ HttpClientBody hcb = new HttpClientBody("http://jsonplaceholder.typicode.com/pos
 ```
 ##### java 7+
 ```java
+String parameters = "id=1&title='title'&body='body'&userId=1";
 try (HttpClientBody hcb = new HttpClientBody("http://jsonplaceholder.typicode.com/posts/1", "PUT")) {
+
     hcb.openConnection();
-    String parameters = "id=1&title='title'&body='body'&userId=1";
     hcb.sendText(parameters);
-    String r = hcb.receiveText();
-    System.out.println("result2 " + r);
-    System.out.println("response code " + hcb.getResponceCode());
+    String result = hcb.receiveText();
+    int responseCode = hcb.getResponceCode());
+    
 }
 ```
 
