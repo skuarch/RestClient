@@ -17,6 +17,7 @@ This library sends text to restful webservice, just used the wrappers and thats 
 * no attachments
 * no marshall
 * no include the format of the request
+* no patch request
 
 
 License
