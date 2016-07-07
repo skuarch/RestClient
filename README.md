@@ -1,5 +1,5 @@
 ### Simple Http client for rest services
-If you are looking for something lightweight and only send text this library is the best option for you.
+If you are looking for something lightweight and only send/receive text this library is the best option for you.
 
 > no dependencies
 
