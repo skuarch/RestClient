@@ -48,22 +48,22 @@ public class HowToUse {
     @Test
     public void tryCatchFinally() throws Exception {
 
-        HttpClientBody wscb3 = new HttpClientBody("http://jsonplaceholder.typicode.com/posts/1", "DELETE");
+        HttpClientBody hcb = new HttpClientBody("http://jsonplaceholder.typicode.com/posts/1", "DELETE");
 
         try {
 
-            wscb3.openConnection();
+            hcb.openConnection();
             String parameters = "id=1&title='title'&body='body'&userId=1";
-            wscb3.sendText(parameters);
-            String result = wscb3.receiveText();
+            hcb.sendText(parameters);
+            String result = hcb.receiveText();
             System.out.println("result3 " + result);
-            System.out.println("response code " + wscb3.getResponceCode());
+            System.out.println("response code " + hcb.getResponceCode());
 
         } catch (Exception ex) {
             throw ex;
         } finally {
             try {
-                wscb3.close();
+                hcb.close();
             } catch (Exception e) {
                 throw e;
             }

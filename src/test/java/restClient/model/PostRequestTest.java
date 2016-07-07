@@ -12,7 +12,7 @@ import org.junit.Test;
 public class PostRequestTest {
 
     private static final String URL = "http://localhost:8000";
-    private static final String CREDENTIALS = "skuarch@yahoo.com.mx:59119d7e886176032c2f0306e4101a7f";
+    private static final String CREDENTIALS = "";
 
     //==========================================================================
     /**
@@ -27,7 +27,7 @@ public class PostRequestTest {
 
         HttpClientBody wscb = new HttpClientBody(
                 URL + "/posts",
-                RestfulClient.POST,
+                "POST",
                 URL);
 
         try {

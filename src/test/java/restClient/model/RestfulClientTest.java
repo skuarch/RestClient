@@ -1,6 +1,5 @@
 package restClient.model;
 
-import restClient.model.RestfulClient;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.net.MalformedURLException;

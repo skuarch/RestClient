@@ -1,6 +1,5 @@
 package restClient.model;
 
-import restClient.model.RestfulClient;
 import restClient.net.HttpClientBody;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -11,7 +10,7 @@ import org.junit.Test;
  */
 public class WebServiceClientBodyTest {
 
-    public static final String CREDENTIALS = "skuarch@yahoo.com.mx:59119d7e886176032c2f0306e4101a7f";
+    public static final String CREDENTIALS = "";
 
     //==========================================================================
     public WebServiceClientBodyTest() {
@@ -38,11 +37,11 @@ public class WebServiceClientBodyTest {
             instance.openConnection();
             instance.sendText(text);
             String result = instance.receiveText();
-            System.out.println("result " + result);            
+            System.out.println("result " + result);
         } catch (Exception e) {
             //if (!(e instanceof ConnectException)) {
-                throw e;
-           //}
+            throw e;
+            //}
         }
 
     }
@@ -61,7 +60,7 @@ public class WebServiceClientBodyTest {
             HttpClientBody instance
                     = new HttpClientBody(
                             "http://localhost:8000/v1/station/create",
-                            RestfulClient.GET,
+                            "GET",
                             CREDENTIALS
                     );
             instance.openConnection();

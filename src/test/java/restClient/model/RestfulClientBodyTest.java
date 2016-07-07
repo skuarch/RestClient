@@ -1,7 +1,5 @@
 package restClient.model;
 
-import restClient.model.RestfulClientBody;
-import restClient.model.RestfulClient;
 import java.io.IOException;
 import java.net.ConnectException;
 import org.junit.Test;
@@ -12,7 +10,7 @@ import org.junit.Test;
  */
 public class RestfulClientBodyTest {
 
-    public static final String CREDENTIALS = "skuarch@yahoo.com.mx:59119d7e886176032c2f0306e4101a7f";
+    public static final String CREDENTIALS = "";
     public static final String URL = "http://localhost:8000/";
 
     //==========================================================================
@@ -33,7 +31,7 @@ public class RestfulClientBodyTest {
 
             //wrong request method
             String text = "testing";
-            instance.openConnection(URL, RestfulClient.POST);
+            instance.openConnection(URL, "POST");
             instance.setAuthentication(CREDENTIALS);
             instance.sendText(text);
 
@@ -63,7 +61,7 @@ public class RestfulClientBodyTest {
 
             //wrong url and wrong request method
             String text = "testing";
-            instance.openConnection(URL + "v1/thisurldoesntexits", RestfulClient.PUT);
+            instance.openConnection(URL + "v1/thisurldoesntexits", "PUT");
             instance.setDefaulProperties();
             instance.setAuthentication(CREDENTIALS);
             instance.sendText(text);
@@ -92,7 +90,7 @@ public class RestfulClientBodyTest {
 
             // incomplete request or wrong parameters
             String parameters = "name='mocos10'&urlStreaming='mas mocos1'&genre.id=1&country.id=1&stationType.id=1&keyword.id=1&language.id=1&description='mcoos'&active=1";
-            instance.openConnection(URL + "v1/station/create", RestfulClient.POST);
+            instance.openConnection(URL + "v1/station/create", "POST");
             instance.setAuthentication(CREDENTIALS);
             instance.sendText(parameters);
             String result = instance.receiveText();
@@ -112,6 +110,7 @@ public class RestfulClientBodyTest {
     //==========================================================================
     /**
      * Test of receiveText method, of class RestfulClientBody.
+     *
      * @throws java.lang.Exception
      */
     @Test
@@ -124,7 +123,7 @@ public class RestfulClientBodyTest {
 
             // correct implementation, wrong request method
             String parameters = "name='mocos10'&urlStreaming='mas mocos1'&genre.id=1&country.id=1&stationType.id=1&keyword.id=1&language.id=1&description='mcoos'&active=1";
-            instance.openConnection("http://google.com", RestfulClient.POST);
+            instance.openConnection("http://google.com", "POST");
             instance.setAuthentication(CREDENTIALS);
             instance.sendText(parameters);
             instance.getResponseCodeCache();

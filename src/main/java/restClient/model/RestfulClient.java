@@ -23,16 +23,12 @@ public abstract class RestfulClient implements AutoCloseable {
 
     private HttpURLConnection hurlc = null;
     protected static final String UTF_8 = "utf-8";
-    protected static final String HURLC_IS_NULL = "hurlc is null";
-    protected static final String WRONG_RESPONSE_CODE = "response code is not 200";
+    protected static final String HURLC_IS_NULL = "hurlc is null";    
+    private static final String NO_CONNECTED = "no connected";
     protected static final int HTTP_OK = 200;
     protected static final int HTTP_CREATED = 201;
     protected static final int HTTP_ACCEPTED = 202;
     protected static final int HTTP_PARTIAL_INFO = 203;
-    protected static final String POST = "POST";
-    protected static final String GET = "GET";
-    protected static final String PUT = "PUT";
-    protected static final String DELETE = "DELETE";
     private int responseCode = 0;
     private boolean isConnected = false;
     private String url;
@@ -90,16 +86,12 @@ public abstract class RestfulClient implements AutoCloseable {
     protected int getResponseCode() throws Exception {
 
         if (!isConnected) {
-            throw new ConnectException("no connected");
+            throw new ConnectException(NO_CONNECTED);
         }
 
-        try {
-            responseCode = hurlc.getResponseCode();
-        } catch (Exception e) {
-            throw e;
-        }
-
+        responseCode = hurlc.getResponseCode();
         return responseCode;
+
     }
 
     //==========================================================================
@@ -115,22 +107,16 @@ public abstract class RestfulClient implements AutoCloseable {
         }
 
         if (!isConnected) {
-            throw new ConnectException("no connected");
+            throw new ConnectException(NO_CONNECTED);
         }
 
-        try {
-
-            hurlc.setInstanceFollowRedirects(false);
-            setRequestProperty("charset", UTF_8);
-            hurlc.setUseCaches(false);
-            hurlc.setDefaultUseCaches(false);
-            setRequestProperty("Pragma", "no-cache");
-            setRequestProperty("Cache-Control", "no-cache");
-            setRequestProperty("Expires", "-1");
-
-        } catch (Exception e) {
-            throw e;
-        }
+        hurlc.setInstanceFollowRedirects(false);
+        setRequestProperty("charset", UTF_8);
+        hurlc.setUseCaches(false);
+        hurlc.setDefaultUseCaches(false);
+        setRequestProperty("Pragma", "no-cache");
+        setRequestProperty("Cache-Control", "no-cache");
+        setRequestProperty("Expires", "-1");
 
     }
 
@@ -157,7 +143,7 @@ public abstract class RestfulClient implements AutoCloseable {
         }
 
         if (!isConnected) {
-            throw new IllegalStateException("no connected");
+            throw new IllegalStateException(NO_CONNECTED);
         }
 
         hurlc.setRequestProperty(property, value);
@@ -177,11 +163,7 @@ public abstract class RestfulClient implements AutoCloseable {
             throw new IllegalArgumentException("contentType is null or empty");
         }
 
-        try {
-            setRequestProperty("Content-Type:", contentType);
-        } catch (Exception e) {
-            throw e;
-        }
+        setRequestProperty("Content-Type:", contentType);
 
     }
 

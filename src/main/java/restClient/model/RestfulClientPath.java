@@ -36,7 +36,7 @@ public class RestfulClientPath extends RestfulClient {
      * @throws IOException in case of error.
      */
     protected void openConnection(String path) throws IOException {
-        super.openConnection(path, RestfulClient.GET);
+        super.openConnection(path, "GET");
     }
 
     //==========================================================================
