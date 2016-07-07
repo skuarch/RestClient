@@ -9,7 +9,6 @@ If you are looking for something lightweight and only send/receive text this lib
 
 > only pure java
 
-
 This library sends text to restful webservice, just used the wrappers and thats all.
 
 #### What doesn't this library do?
